@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSO Labs — Identity Operations Runbooks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #F6F7F9;
+    --surface: #FFFFFF;
+    --surface-2: #F0F1F4;
+    --surface-3: #E8EAF0;
+    --border: #D8DCE4;
+    --border-active: #2563EB;
+    --text: #1A1D26;
+    --text-secondary: #4B5468;
+    --text-muted: #8790A2;
+    --accent: #2563EB;
+    --accent-dim: rgba(37,99,235,0.08);
+    --green: #16A34A;
+    --green-dim: rgba(22,163,74,0.08);
+    --amber: #D97706;
+    --amber-dim: rgba(217,119,6,0.08);
+    --red: #DC2626;
+    --red-dim: rgba(220,38,38,0.08);
+    --purple: #7C3AED;
+    --purple-dim: rgba(124,58,237,0.08);
+    --cyan: #0891B2;
+    --cyan-dim: rgba(8,145,178,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ── Top bar ── */
+.topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(246,247,249,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-logo {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, #2563EB, #4F46E5);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff;
+}
+.topbar-title { font-weight: 600; font-size: 14px; color: var(--text); }
+.topbar-sep { color: var(--text-muted); font-size: 14px; }
+.topbar-workflow { font-size: 14px; color: var(--text-secondary); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-badge {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 4px 10px; border-radius: 4px;
+    background: var(--green-dim); color: var(--green);
+}
+.topbar-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #4F46E5, #2563EB);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+}
+
+/* ── Layout ── */
+.layout { display: flex; margin-top: 56px; min-height: calc(100vh - 56px); }
+
+/* ── Sidebar ── */
+.sidebar {
+    width: 280px; min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: fixed; top: 56px; bottom: 0; left: 0;
+    overflow-y: auto;
+}
+.sidebar-section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text-muted); padding: 0 20px; margin-bottom: 8px; margin-top: 20px;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+.sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 20px; cursor: pointer; transition: all 0.15s;
+    border-left: 3px solid transparent; font-size: 13px; color: var(--text-secondary);
+}
+.sidebar-item:hover { background: var(--surface-2); color: var(--text); }
+.sidebar-item.active {
+    background: var(--accent-dim); color: var(--accent);
+    border-left-color: var(--accent); font-weight: 600;
+}
+.sidebar-item .si-icon {
+    width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 10px;
+}
+.sidebar-item .si-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+    color: var(--text-muted); margin-left: auto; min-width: 20px; text-align: right;
+}
+.sidebar-item.active .si-num { color: var(--accent); }
+.sidebar-progress {
+    margin: 20px 20px 0; padding: 14px; border-radius: 8px;
+    background: var(--surface-2); border: 1px solid var(--border);
+}
+.sidebar-progress-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.sidebar-progress-bar { width: 100%; height: 4px; border-radius: 2px; background: var(--surface-3); overflow: hidden; }
+.sidebar-progress-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.5s; }
+.sidebar-progress-text { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── Main content ── */
+.main { margin-left: 280px; flex: 1; padding: 40px 48px 80px; max-width: 900px; }
+
+/* ── Runbook panels ── */
+.runbook-panel { display: none; }
+.runbook-panel.active { display: block; }
+
+/* ── Runbook header ── */
+.rb-header { margin-bottom: 36px; }
+.rb-id {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.rb-title { font-size: 26px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
+.rb-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 680px; }
+
+/* ── Meta badges ── */
+.rb-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.rb-badge {
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px;
+    display: flex; align-items: center; gap: 5px;
+}
+.rb-badge.severity-high { background: var(--red-dim); color: var(--red); }
+.rb-badge.severity-med { background: var(--amber-dim); color: var(--amber); }
+.rb-badge.severity-low { background: var(--green-dim); color: var(--green); }
+.rb-badge.category { background: var(--purple-dim); color: var(--purple); }
+.rb-badge.time { background: var(--cyan-dim); color: var(--cyan); }
+.rb-badge .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ── Sections ── */
+.rb-section { margin-bottom: 32px; }
+.rb-section-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-muted); margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ── Symptom / trigger blocks ── */
+.symptom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.symptom-card {
+    padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); font-size: 13px; color: var(--text-secondary);
+    display: flex; align-items: flex-start; gap: 8px;
+}
+.symptom-card .sym-icon { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+
+/* ── Steps ── */
+.step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 12px; overflow: hidden; transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.step:hover { border-color: var(--border-active); }
+.step.completed { border-color: var(--green); }
+.step.completed .step-header { background: var(--green-dim); }
+
+.step-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; cursor: pointer; transition: background 0.15s;
+}
+.step-header:hover { background: var(--surface-2); }
+
+.step-check {
+    width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; font-size: 12px; color: transparent;
+}
+.step.completed .step-check {
+    background: var(--green); border-color: var(--green); color: #fff;
+}
+.step-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    color: var(--text-muted); min-width: 24px;
+}
+.step-title { font-size: 14px; font-weight: 600; flex: 1; }
+.step-chevron { color: var(--text-muted); transition: transform 0.2s; font-size: 14px; }
+.step.open .step-chevron { transform: rotate(90deg); }
+
+.step-body {
+    display: none; padding: 0 18px 18px 56px;
+    font-size: 13px; color: var(--text-secondary); line-height: 1.7;
+}
+.step.open .step-body { display: block; }
+
+.step-body p { margin-bottom: 10px; }
+.step-body strong { color: var(--text); font-weight: 600; }
+
+/* ── Code blocks ── */
+.code-block {
+    background: #F0F1F4; border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 16px; margin: 10px 0; overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7;
+    color: #334155; position: relative;
+}
+.code-block .code-label {
+    position: absolute; top: 0; right: 0; padding: 3px 8px;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted); background: var(--surface-3); border-radius: 0 6px 0 6px;
+}
+.code-block .kw { color: #2563EB; }
+.code-block .str { color: #16A34A; }
+.code-block .cmt { color: #8790A2; font-style: italic; }
+.code-block .var { color: #D97706; }
+.code-block .num { color: #DC2626; }
+
+/* ── Info / warning / danger callouts ── */
+.callout {
+    padding: 12px 16px; border-radius: 8px; margin: 12px 0;
+    font-size: 13px; line-height: 1.6; display: flex; align-items: flex-start; gap: 10px;
+}
+.callout-icon { flex-shrink: 0; margin-top: 2px; font-size: 15px; }
+.callout.info { background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.2); }
+.callout.info .callout-icon { color: var(--accent); }
+.callout.warn { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.2); }
+.callout.warn .callout-icon { color: var(--amber); }
+.callout.danger { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.2); }
+.callout.danger .callout-icon { color: var(--red); }
+
+/* ── Decision tree ── */
+.decision {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin: 10px 0;
+}
+.decision-q { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.decision-branch {
+    display: flex; align-items: flex-start; gap: 8px; font-size: 12px;
+    color: var(--text-secondary); margin-bottom: 4px; padding-left: 4px;
+}
+.decision-branch .branch-label {
+    font-family: 'JetBrains Mono', monospace; font-weight: 600; min-width: 36px;
+    flex-shrink: 0;
+}
+.decision-branch .branch-label.yes { color: var(--green); }
+.decision-branch .branch-label.no { color: var(--red); }
+
+/* ── Error code table ── */
+.error-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+.error-table th {
+    text-align: left; padding: 8px 12px; background: var(--surface-3);
+    font-weight: 600; color: var(--text-secondary); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+}
+.error-table td {
+    padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary);
+}
+.error-table td:first-child {
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--amber);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px; }
+    .symptom-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-logo">S</div>
+        <span class="topbar-title">SSO Labs</span>
+        <span class="topbar-sep">›</span>
+        <span class="topbar-workflow">Identity Operations Runbooks</span>
+    </div>
+    <div class="topbar-right">
+        <div class="topbar-badge">Process.St Simulator — Operational Runbooks</div>
+        <div class="topbar-avatar">EY</div>
+    </div>
+</div>
+
+<!-- ── Layout ── -->
+<div class="layout">
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+    <div class="sidebar-progress">
+        <div class="sidebar-progress-label">Runbook completion</div>
+        <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="sidebar-progress-text" id="progressText">0 / 42 steps</div>
+    </div>
+
+    <div class="sidebar-section-label">Runbooks</div>
+    <div class="sidebar-item active" data-panel="rb1">
+        <div class="si-icon" style="background:var(--red-dim);color:var(--red)">⚡</div>
+        Entra Connect Sync Failure
+        <span class="si-num">9</span>
+    </div>
+    <div class="sidebar-item" data-panel="rb2">
+        <div class="si-icon" style="background:var(--amber-dim);color:var(--amber)">🛡</div>
+        CA Blocking Legit Users
+        <span class="si-num">8</span>
+    </div>
+    <div class="sidebar-item" data-panel="rb3">
+        <div class="si-icon" style="background:var(--purple-dim);color:var(--purple)">🔑</div>
+        SAML SSO Assertion Failure
+        <span class="si-num">9</span>
+    </div>
+    <div class="sidebar-item" data-panel="rb4">
+        <div class="si-icon" style="background:var(--cyan-dim);color:var(--cyan)">📱</div>
+        MFA Registration Lockout
+        <span class="si-num">8</span>
+    </div>
+    <div class="sidebar-item" data-panel="rb5">
+        <div class="si-icon" style="background:var(--green-dim);color:var(--green)">👤</div>
+        AD User Not in Entra
+        <span class="si-num">8</span>
+    </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- RUNBOOK 1 — ENTRA CONNECT SYNC FAILURE                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="runbook-panel active" id="rb1">
+    <div class="rb-header">
+        <div class="rb-id">RB-001</div>
+        <div class="rb-title">Entra Connect Sync Failure</div>
+        <div class="rb-desc">Delta or full synchronization between Active Directory and Entra ID has stopped, stalled, or is producing export errors. Users, groups, or attribute changes are not propagating to the cloud directory.</div>
+        <div class="rb-meta">
+            <span class="rb-badge severity-high"><span class="badge-dot"></span> P1 — High</span>
+            <span class="rb-badge category">Hybrid Identity</span>
+            <span class="rb-badge time">⏱ Est. 15–45 min</span>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Symptoms & Triggers</div>
+        <div class="symptom-grid">
+            <div class="symptom-card"><span class="sym-icon">⚠️</span> New AD users not appearing in Entra portal after 30+ minutes</div>
+            <div class="symptom-card"><span class="sym-icon">⚠️</span> Entra Connect Health alert email: "Synchronization service not running"</div>
+            <div class="symptom-card"><span class="sym-icon">⚠️</span> Attribute changes (title, department, group membership) stuck in AD</div>
+            <div class="symptom-card"><span class="sym-icon">⚠️</span> Synchronization Service Manager shows red export error icons</div>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Diagnostic & Resolution Steps</div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">01</span>
+                <span class="step-title">Confirm the sync engine service is running</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Open <strong>Services</strong> on the Entra Connect server and check the status of <strong>Microsoft Azure AD Sync</strong>. If the service is stopped, start it manually. If it fails to start, check the Windows Application event log for service crash errors.</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell</span>
+                    <span class="kw">Get-Service</span> <span class="str">"ADSync"</span> | <span class="kw">Select-Object</span> Name, Status, StartType<br><br>
+                    <span class="cmt"># If stopped:</span><br>
+                    <span class="kw">Start-Service</span> <span class="str">"ADSync"</span>
+                </div>
+                <div class="callout info">
+                    <span class="callout-icon">ℹ️</span>
+                    <span>The ADSync service runs as a Windows service under the AAD_xxxx account that was created during installation. If the service account password was changed in AD without updating the service, it will fail to start.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">02</span>
+                <span class="step-title">Check the sync scheduler status</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>The scheduler controls the automatic 30-minute delta sync cycle. Verify it's enabled and not suspended. <strong>SyncCycleEnabled</strong> must be True and <strong>StagingModeEnabled</strong> must be False for production sync.</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell 5.1</span>
+                    <span class="kw">Import-Module</span> <span class="str">"C:\Program Files\Microsoft Azure AD Sync\Bin\ADSync\ADSync.psd1"</span><br>
+                    <span class="kw">Get-ADSyncScheduler</span><br><br>
+                    <span class="cmt"># Key properties to check:</span><br>
+                    <span class="cmt"># SyncCycleEnabled          : True</span><br>
+                    <span class="cmt"># SyncCycleInProgress       : False</span><br>
+                    <span class="cmt"># StagingModeEnabled        : False</span><br>
+                    <span class="cmt"># NextSyncCyclePolicyType   : Delta</span>
+                </div>
+                <div class="decision">
+                    <div class="decision-q">Is SyncCycleEnabled = False?</div>
+                    <div class="decision-branch"><span class="branch-label yes">YES →</span> Run <code>Set-ADSyncScheduler -SyncCycleEnabled $true</code> then proceed to Step 3</div>
+                    <div class="decision-branch"><span class="branch-label no">NO →</span> Scheduler is enabled, proceed to Step 3 to check for export errors</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">03</span>
+                <span class="step-title">Open Synchronization Service Manager and inspect run history</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Launch <strong>Synchronization Service Manager</strong> from Start Menu (or <code>C:\Program Files\Microsoft Azure AD Sync\UIShell\miisclient.exe</code>). Click the <strong>Operations</strong> tab. Look at the most recent runs — each row shows a connector name, operation type (Delta Import, Delta Sync, Export), and a status.</p>
+                <p>A healthy sync shows <strong>success</strong> on all three operations for both connectors. Look for rows with status <strong>stopped-error</strong>, <strong>stopped-server-down</strong>, or <strong>completed-export-errors</strong>.</p>
+                <div class="callout warn">
+                    <span class="callout-icon">⚠️</span>
+                    <span><strong>completed-export-errors</strong> is the most common failure state. It means the sync engine processed data but Entra rejected one or more objects during export. Click the row, then click the number in the "Export Errors" column to see specific objects.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">04</span>
+                <span class="step-title">Identify the specific export error</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Click the failed export row, then click the error count. The detail pane shows the <strong>Error Name</strong>, <strong>Error Type</strong>, and the <strong>Distinguished Name</strong> of the failing object.</p>
+                <table class="error-table">
+                    <tr><th>Error Name</th><th>Common Cause</th><th>Resolution</th></tr>
+                    <tr><td>InvalidSoftMatch</td><td>An AD user's proxyAddress or UPN matches an existing cloud-only user</td><td>Delete or rename the conflicting cloud user, or hard-match using ImmutableID</td></tr>
+                    <tr><td>AttributeValueMustBeUnique</td><td>Duplicate proxyAddress, UPN, or mailNickname across two AD users</td><td>Find and fix the duplicate attribute in AD, then re-sync</td></tr>
+                    <tr><td>DataValidationFailed</td><td>Attribute value exceeds max length or contains invalid characters</td><td>Fix the attribute value in AD (often a phone number or address field)</td></tr>
+                    <tr><td>LargeObject</td><td>User has too many group memberships (>500 direct) or proxy addresses</td><td>Reduce direct group memberships or use nested groups</td></tr>
+                    <tr><td>IdentityDataValidationFailed</td><td>UPN contains invalid characters or uses an unverified domain</td><td>Fix the UPN in AD to use a verified domain suffix</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">05</span>
+                <span class="step-title">Inspect the failing object in the connector space</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>In Synchronization Service Manager, go to the <strong>Connectors</strong> tab. Right-click the <strong>ssolabs1001.onmicrosoft.com</strong> connector → <strong>Search Connector Space</strong>. Search by Distinguished Name from the error. Click the object, then click <strong>Properties</strong> to see its pending export attributes.</p>
+                <p>Compare the pending export values against what Entra expects. Common mismatches include a UPN that doesn't match an Entra verified domain, or a proxyAddress collision with another synced object.</p>
+                <div class="callout info">
+                    <span class="callout-icon">ℹ️</span>
+                    <span>You can also search by <strong>Metaverse Distinguished Name</strong> on the AD connector to see what the source data looks like before sync rules transform it.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">06</span>
+                <span class="step-title">Fix the source data in Active Directory</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Based on the error from Step 4, make the necessary correction directly in Active Directory. Common fixes:</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell — fix duplicate UPN</span>
+                    <span class="cmt"># Find users with duplicate UPN prefix</span><br>
+                    <span class="kw">Get-ADUser</span> -Filter <span class="str">"UserPrincipalName -like 'duplicate.user*'"</span> -Properties UserPrincipalName<br><br>
+                    <span class="cmt"># Fix the UPN</span><br>
+                    <span class="kw">Set-ADUser</span> -Identity <span class="str">"CN=Duplicate User,OU=..."</span> -UserPrincipalName <span class="str">"corrected.user@yearwood.local"</span>
+                </div>
+                <div class="code-block">
+                    <span class="code-label">PowerShell — fix duplicate proxyAddress</span>
+                    <span class="cmt"># Find all users with a specific proxy address</span><br>
+                    <span class="kw">Get-ADUser</span> -Filter * -Properties proxyAddresses | <span class="kw">Where-Object</span> { $_.proxyAddresses -match <span class="str">"duplicate@"</span> }
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">07</span>
+                <span class="step-title">Force a delta sync cycle</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After fixing the source data, trigger an immediate delta sync instead of waiting for the next 30-minute automatic cycle.</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell 5.1</span>
+                    <span class="kw">Start-ADSyncSyncCycle</span> -PolicyType Delta
+                </div>
+                <p>Watch the Operations tab in Synchronization Service Manager. The delta import, delta sync, and export should all complete with <strong>success</strong> status. If the same export error persists, the fix in Step 6 didn't resolve the root cause — go back and re-inspect.</p>
+                <div class="callout warn">
+                    <span class="callout-icon">⚠️</span>
+                    <span>Only use <code>-PolicyType Initial</code> (full sync) as a last resort. Full syncs re-process every object in the directory and can take hours on large tenants. Delta sync only processes objects that changed since the last run.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">08</span>
+                <span class="step-title">Verify the object now exists in Entra</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After the delta sync completes successfully, verify the previously failing object now appears in the Entra portal under <strong>Users</strong> (or Groups). Confirm <strong>On-premises synced: Yes</strong> is displayed on the user profile.</p>
+                <p>You can also verify programmatically:</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell — Graph</span>
+                    <span class="kw">Get-MgUser</span> -Filter <span class="str">"userPrincipalName eq 'corrected.user@ssolabs1001.onmicrosoft.com'"</span> | <span class="kw">Select</span> DisplayName, OnPremisesSyncEnabled
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="1">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">09</span>
+                <span class="step-title">Document and close</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Record the following in the incident ticket:</p>
+                <p><strong>Root cause:</strong> The specific error name and which AD attribute caused it.<br>
+                <strong>Resolution:</strong> What was changed in AD and when the delta sync confirmed the fix.<br>
+                <strong>Prevention:</strong> Whether an AD attribute validation policy should be implemented to prevent the same type of data from entering AD in the future.</p>
+                <div class="callout info">
+                    <span class="callout-icon">ℹ️</span>
+                    <span>Export the Entra Audit Log filtered to "Azure AD Connect" source for the last 24 hours as evidence. This shows every sync operation and its outcome.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- RUNBOOK 2 — CA BLOCKING LEGITIMATE USERS                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="runbook-panel" id="rb2">
+    <div class="rb-header">
+        <div class="rb-id">RB-002</div>
+        <div class="rb-title">Conditional Access Blocking Legitimate Users</div>
+        <div class="rb-desc">A user reports they cannot sign in to a cloud app. The sign-in is being blocked or challenged by a Conditional Access policy when it should be allowed. Common after CA policy changes, new app registrations, or device compliance state changes.</div>
+        <div class="rb-meta">
+            <span class="rb-badge severity-high"><span class="badge-dot"></span> P1 — High</span>
+            <span class="rb-badge category">Conditional Access</span>
+            <span class="rb-badge time">⏱ Est. 10–30 min</span>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Symptoms & Triggers</div>
+        <div class="symptom-grid">
+            <div class="symptom-card"><span class="sym-icon">🚫</span> User sees "You cannot access this right now" or AADSTS53003 error</div>
+            <div class="symptom-card"><span class="sym-icon">🔄</span> User is stuck in an MFA loop — completes MFA but gets challenged again</div>
+            <div class="symptom-card"><span class="sym-icon">📱</span> User can sign in from their phone but not their laptop (or vice versa)</div>
+            <div class="symptom-card"><span class="sym-icon">⏰</span> Started happening after a CA policy was created or modified</div>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Error Code Reference</div>
+        <table class="error-table">
+            <tr><th>Error Code</th><th>Name</th><th>Meaning</th></tr>
+            <tr><td>53003</td><td>BlockedByConditionalAccess</td><td>Access blocked by a CA policy. The grant controls were not satisfied.</td></tr>
+            <tr><td>50076</td><td>UserStrongAuthEnrollmentRequired</td><td>User needs to register for MFA but hasn't completed registration.</td></tr>
+            <tr><td>50097</td><td>DeviceAuthenticationRequired</td><td>CA policy requires a compliant or Entra-joined device but the device doesn't meet requirements.</td></tr>
+            <tr><td>53000</td><td>DeviceNotCompliant</td><td>Intune compliance policy marks the device as non-compliant.</td></tr>
+            <tr><td>530003</td><td>BlockedBySecurityDefaults</td><td>Security Defaults (not CA) is blocking the sign-in. Usually means Security Defaults wasn't disabled.</td></tr>
+        </table>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Diagnostic & Resolution Steps</div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">01</span>
+                <span class="step-title">Pull the sign-in log entry for the failed attempt</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>In the Entra portal go to <strong>Identity → Monitoring → Sign-in logs</strong>. Filter by the affected user's UPN and the time range of the reported failure. Click the failed sign-in entry (Status: <strong>Failure</strong> or <strong>Interrupted</strong>).</p>
+                <p>On the <strong>Basic info</strong> tab, record the <strong>Sign-in error code</strong> and <strong>Failure reason</strong>. Then click the <strong>Conditional Access</strong> tab — this shows exactly which policies were evaluated, which ones applied, and which grant controls succeeded or failed.</p>
+                <div class="callout info">
+                    <span class="callout-icon">ℹ️</span>
+                    <span>The Conditional Access tab on the sign-in log is the single most important diagnostic view. It lists every CA policy with its evaluation result: <strong>Success</strong> (policy applied, controls satisfied), <strong>Failure</strong> (policy applied, controls NOT satisfied — this is your blocker), or <strong>Not applied</strong> (policy conditions didn't match this sign-in).</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">02</span>
+                <span class="step-title">Identify which CA policy is blocking</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>In the Conditional Access tab, find the policy with result <strong>Failure</strong>. Note the policy name and which grant control failed. Common scenarios:</p>
+                <div class="decision">
+                    <div class="decision-q">Which grant control failed?</div>
+                    <div class="decision-branch"><span class="branch-label" style="color:var(--amber);min-width:120px">Require MFA →</span> User hasn't registered for MFA or MFA challenge failed. Go to Step 3.</div>
+                    <div class="decision-branch"><span class="branch-label" style="color:var(--amber);min-width:120px">Compliant device →</span> Device is not Intune-enrolled or compliance policy marks it non-compliant. Go to Step 5.</div>
+                    <div class="decision-branch"><span class="branch-label" style="color:var(--amber);min-width:120px">Block access →</span> User matched a blocking policy (e.g., CA-003 legacy auth). Go to Step 6.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">03</span>
+                <span class="step-title">Simulate with What If to confirm the policy logic</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Go to <strong>Conditional Access → Policies → What If</strong>. Enter the affected user, the target app, and the sign-in conditions (device platform, client app) that match their failed attempt. Click <strong>What If</strong>.</p>
+                <p>Compare the What If result against the sign-in log. They should match — the same policies should fire with the same grant controls. If they don't match, the user's actual sign-in conditions may differ from what they reported (e.g., they said "browser" but are using an Outlook desktop client).</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">04</span>
+                <span class="step-title">Check if the user is incorrectly included or excluded</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Open the blocking CA policy. Check the <strong>Users</strong> assignment:</p>
+                <p>• Is the user in the Include scope when they shouldn't be?<br>
+                • Should the user be in an Exclude group but isn't?<br>
+                • Is the user's group membership stale (they changed departments but the group wasn't updated)?</p>
+                <p>Also check the <strong>Target resources</strong> — does the policy target "All cloud apps" when it should only target specific apps?</p>
+                <div class="callout warn">
+                    <span class="callout-icon">⚠️</span>
+                    <span>Never resolve a CA block by adding the user to an exclusion group as a permanent fix. That's a security bypass. Instead, fix the root cause — either the policy scope is too broad, or the user needs to satisfy the grant control (register for MFA, enroll their device, etc.).</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">05</span>
+                <span class="step-title">Resolve device compliance issues (if applicable)</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>If error code <strong>50097</strong> or <strong>53000</strong>, check the device's compliance state in Intune (<strong>Devices → All devices</strong>, search by user). Common issues:</p>
+                <p>• Device not enrolled in Intune<br>
+                • OS version out of compliance (needs update)<br>
+                • BitLocker not enabled<br>
+                • Antivirus definitions outdated</p>
+                <p>The user may need to re-enroll their device or update their OS to satisfy the compliance policy.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">06</span>
+                <span class="step-title">Check for legacy auth blocking (CA-003 pattern)</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>If the sign-in log shows the <strong>Client app</strong> as "Exchange ActiveSync", "Other clients", "IMAP", or "SMTP" — the user is using a legacy authentication protocol that CA-003 is correctly blocking.</p>
+                <p>This is <strong>working as designed</strong>. The resolution is to migrate the user to a modern auth client (Outlook desktop, Outlook mobile, or webmail), not to weaken the CA policy.</p>
+                <div class="callout danger">
+                    <span class="callout-icon">🚨</span>
+                    <span>Never disable or create exceptions in your legacy auth blocking policy. Legacy protocols cannot perform MFA, so any exception permanently bypasses your MFA enforcement for that user. If a user "needs" legacy auth, escalate to security for risk acceptance.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">07</span>
+                <span class="step-title">Apply the fix and verify</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After identifying and fixing the root cause (policy scope correction, user MFA registration, device enrollment), ask the user to attempt sign-in again. Check the sign-in logs to confirm the new attempt shows Status: <strong>Success</strong> with the CA policy result showing <strong>Success</strong> (controls satisfied).</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="2">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">08</span>
+                <span class="step-title">Document and close</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p><strong>Root cause:</strong> Which CA policy blocked the user, which grant control failed, and why the user's sign-in conditions triggered the policy.<br>
+                <strong>Resolution:</strong> What was changed — policy scope adjusted, user registered for MFA, device enrolled, or user migrated off legacy client.<br>
+                <strong>Prevention:</strong> Whether the CA policy scope needs refinement or whether onboarding procedures should include MFA registration and device enrollment before the user's first day.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- RUNBOOK 3 — SAML SSO ASSERTION FAILURE                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="runbook-panel" id="rb3">
+    <div class="rb-header">
+        <div class="rb-id">RB-003</div>
+        <div class="rb-title">SAML SSO Assertion Failure</div>
+        <div class="rb-desc">A user authenticates successfully with Entra but the service provider (SP) rejects the SAML assertion. The user sees an error page on the application side after completing Entra sign-in. Common after certificate rotation, app re-registration, or claim mapping changes.</div>
+        <div class="rb-meta">
+            <span class="rb-badge severity-med"><span class="badge-dot"></span> P2 — Medium</span>
+            <span class="rb-badge category">SSO / SAML 2.0</span>
+            <span class="rb-badge time">⏱ Est. 15–30 min</span>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Symptoms & Triggers</div>
+        <div class="symptom-grid">
+            <div class="symptom-card"><span class="sym-icon">🔴</span> User completes Entra login but lands on the app's error page</div>
+            <div class="symptom-card"><span class="sym-icon">🔴</span> App logs show "Invalid SAML response" or "Signature validation failed"</div>
+            <div class="symptom-card"><span class="sym-icon">🔴</span> Sign-in log shows Success on Entra side but user can't access the app</div>
+            <div class="symptom-card"><span class="sym-icon">🔴</span> Recently rotated the SAML signing certificate or changed claim mappings</div>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Diagnostic & Resolution Steps</div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">01</span>
+                <span class="step-title">Check the Entra sign-in log SAML tab</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Go to <strong>Sign-in logs</strong>, find the user's sign-in attempt for the SAML app. Even if Entra shows <strong>Success</strong>, click the entry and look at the <strong>Additional Details</strong> tab — it may contain SAML-specific warnings.</p>
+                <p>If available, check the <strong>SAML token</strong> tab. This shows the assertion Entra generated, including the NameID, attributes, and audience. This is the same data you'd see by decoding the base64 SAMLResponse from the browser.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">02</span>
+                <span class="step-title">Capture the SAMLResponse from the browser</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Open browser DevTools (F12) → <strong>Network</strong> tab → enable <strong>Preserve log</strong>. Reproduce the sign-in flow. Look for the POST to the app's ACS URL. In the <strong>Payload</strong> tab, copy the <strong>SAMLResponse</strong> value.</p>
+                <p>Decode it with a base64 decoder or use a SAML decoder tool. Inspect these fields:</p>
+                <div class="code-block">
+                    <span class="code-label">Key fields to verify</span>
+                    <span class="var">Destination</span>    → Must match the app's ACS URL exactly<br>
+                    <span class="var">Audience</span>       → Must match the app's Entity ID / Identifier<br>
+                    <span class="var">NameID</span>         → Must be in the format the app expects (email, UPN, persistent)<br>
+                    <span class="var">NotOnOrAfter</span>   → Must not be in the past (check for clock skew)<br>
+                    <span class="var">Signature</span>      → Certificate must match what the app has configured
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">03</span>
+                <span class="step-title">Verify the ACS URL and Entity ID match</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>The most common SAML failure is a URL mismatch. Compare three values:</p>
+                <p>1. The <strong>Destination</strong> in the SAML assertion (what Entra sent)<br>
+                2. The <strong>Reply URL / ACS URL</strong> configured in the Entra enterprise app<br>
+                3. The <strong>ACS URL</strong> configured on the service provider side</p>
+                <p>All three must be identical — including protocol (http vs https), port number, and trailing slash.</p>
+                <div class="callout warn">
+                    <span class="callout-icon">⚠️</span>
+                    <span>A trailing slash mismatch (<code>https://app.com/sso/acs</code> vs <code>https://app.com/sso/acs/</code>) will cause the SP to reject the assertion even though the URLs look "the same" to a human.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">04</span>
+                <span class="step-title">Check the signing certificate expiration</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>In the Entra portal, go to the enterprise app → <strong>Single sign-on</strong> → <strong>SAML Signing Certificate</strong> section. Check the <strong>Expiration Date</strong>. If expired, the SP will reject every assertion because the signature can't be validated.</p>
+                <p>If the certificate was recently rotated:</p>
+                <p>1. Download the new certificate (Base64 format) from Entra<br>
+                2. Upload it to the SP's SAML configuration<br>
+                3. Test sign-in again</p>
+                <div class="callout danger">
+                    <span class="callout-icon">🚨</span>
+                    <span>Certificate rotation requires updating BOTH sides. If you rotate the cert in Entra but don't upload the new cert to the SP, every SAML sign-in for that app will break immediately. Always coordinate cert rotation with the app owner.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">05</span>
+                <span class="step-title">Verify the NameID format and value</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Check what NameID format the SP expects vs what Entra is sending. In the decoded assertion, look at the <code>NameID Format</code> attribute:</p>
+                <table class="error-table">
+                    <tr><th>Format</th><th>Typical Value</th><th>When Used</th></tr>
+                    <tr><td>emailAddress</td><td>user@domain.com</td><td>Most web apps — matches user by email</td></tr>
+                    <tr><td>persistent</td><td>Opaque GUID</td><td>Privacy-preserving — app can't derive the email</td></tr>
+                    <tr><td>unspecified</td><td>Varies</td><td>App accepts any format — Entra decides</td></tr>
+                </table>
+                <p>If the app expects <code>emailAddress</code> but Entra is sending <code>persistent</code> (or vice versa), reconfigure the NameID format in the enterprise app's SAML settings under <strong>User Attributes & Claims</strong>.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">06</span>
+                <span class="step-title">Check claim mappings for required attributes</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Some SPs require specific attributes in the assertion beyond NameID — for example, a <code>groups</code> claim, a <code>role</code> claim, or a <code>department</code> attribute. If a required claim is missing or has the wrong schema URI, the SP will reject the assertion.</p>
+                <p>Compare the <strong>AttributeStatement</strong> section of the decoded assertion against the SP's documentation for required claims. Add any missing claims in the Entra enterprise app under <strong>User Attributes & Claims</strong>.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">07</span>
+                <span class="step-title">Check for clock skew</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>The SAML assertion has a validity window defined by <strong>NotBefore</strong> and <strong>NotOnOrAfter</strong> timestamps. If the SP's server clock is significantly off from Entra's clock, the SP may reject the assertion as expired or not-yet-valid.</p>
+                <p>Entra typically allows a 5-minute skew window (NotBefore is set 5 minutes before IssueInstant). If the SP's clock is off by more than 5 minutes, you'll need to fix the time synchronization on the SP server — the issue is on the SP side, not the IdP side.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">08</span>
+                <span class="step-title">Test and verify the fix</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After applying the fix (URL correction, cert upload, claim mapping change), use the <strong>Test</strong> button on the Entra enterprise app's SAML SSO page. Entra will walk through the sign-in flow and show a detailed result including any remaining issues.</p>
+                <p>Also test with the actual affected user — have them clear their browser cache and attempt sign-in again. Confirm success in both the Entra sign-in log and the SP's application logs.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="3">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">09</span>
+                <span class="step-title">Document and close</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p><strong>Root cause:</strong> Which specific mismatch caused the SP to reject the assertion — URL, certificate, NameID format, missing claim, or clock skew.<br>
+                <strong>Resolution:</strong> What was corrected and on which side (IdP or SP).<br>
+                <strong>Prevention:</strong> Set a calendar reminder for the next certificate rotation (typically 3 years). Add the SAML signing certificate expiration date to your monitoring system.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- RUNBOOK 4 — MFA REGISTRATION LOCKOUT                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="runbook-panel" id="rb4">
+    <div class="rb-header">
+        <div class="rb-id">RB-004</div>
+        <div class="rb-title">MFA Registration Lockout</div>
+        <div class="rb-desc">A user cannot complete MFA because they lost their phone, switched devices without transferring their authenticator, or their MFA registration became corrupted. They are locked out of all apps that require MFA.</div>
+        <div class="rb-meta">
+            <span class="rb-badge severity-high"><span class="badge-dot"></span> P1 — High</span>
+            <span class="rb-badge category">Authentication</span>
+            <span class="rb-badge time">⏱ Est. 5–15 min</span>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Symptoms & Triggers</div>
+        <div class="symptom-grid">
+            <div class="symptom-card"><span class="sym-icon">📱</span> User reports lost or stolen phone — can't complete Authenticator push</div>
+            <div class="symptom-card"><span class="sym-icon">🔄</span> User got a new phone but didn't transfer Authenticator app</div>
+            <div class="symptom-card"><span class="sym-icon">❌</span> MFA prompt says "Something went wrong" or "Your request was denied"</div>
+            <div class="symptom-card"><span class="sym-icon">🆕</span> New hire was never given the opportunity to register MFA methods</div>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Diagnostic & Resolution Steps</div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">01</span>
+                <span class="step-title">Verify the user's identity through an out-of-band channel</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p><strong>This is the most critical step in the entire runbook.</strong> Before resetting anyone's MFA, you must verify they are who they claim to be. MFA reset is the #1 social engineering attack vector — an attacker calls the helpdesk, claims they lost their phone, and gets MFA reset on a target account.</p>
+                <p>Verify identity using a method that is <strong>not</strong> the same method the user is claiming to have lost:</p>
+                <p>• Video call and verify against their badge photo or HR record<br>
+                • Manager confirmation via a separate communication channel<br>
+                • In-person verification at the IT desk<br>
+                • Pre-established security questions (weakest option)</p>
+                <div class="callout danger">
+                    <span class="callout-icon">🚨</span>
+                    <span>Never reset MFA based solely on an email or chat message. If the attacker has compromised the user's password, they may also have access to their email. The verification must use a channel the attacker cannot control.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">02</span>
+                <span class="step-title">Check the user's current MFA registration state</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>In the Entra portal, go to <strong>Users</strong> → select the user → <strong>Authentication methods</strong>. This page shows all registered MFA methods: Authenticator app, phone numbers, FIDO2 keys, etc.</p>
+                <p>Determine what methods exist and which ones the user still has access to. If they have a backup method (e.g., a phone number for SMS), they may be able to use that instead of a full reset.</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell — Graph</span>
+                    <span class="kw">Get-MgUserAuthenticationMethod</span> -UserId <span class="str">"elena.vasquez@ssolabs1001.onmicrosoft.com"</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">03</span>
+                <span class="step-title">Determine the correct remediation path</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <div class="decision">
+                    <div class="decision-q">Does the user have any working MFA methods left?</div>
+                    <div class="decision-branch"><span class="branch-label yes">YES →</span> Have them sign in using the backup method, then add their new device as an additional method from their Security Info page. Skip to Step 7.</div>
+                    <div class="decision-branch"><span class="branch-label no">NO →</span> All methods are inaccessible. Proceed to Step 4 to delete the old methods and require re-registration.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">04</span>
+                <span class="step-title">Delete the old authentication methods</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>In the Entra portal on the user's <strong>Authentication methods</strong> page, delete each registered method that the user no longer has access to. This includes the Authenticator app registration, phone numbers for old devices, etc.</p>
+                <p>Via PowerShell for bulk operations:</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell — Graph</span>
+                    <span class="cmt"># List all methods</span><br>
+                    <span class="kw">$methods</span> = <span class="kw">Get-MgUserAuthenticationMethod</span> -UserId <span class="str">"elena.vasquez@ssolabs1001.onmicrosoft.com"</span><br><br>
+                    <span class="cmt"># Delete a specific phone method</span><br>
+                    <span class="kw">Remove-MgUserAuthenticationPhoneMethod</span> -UserId <span class="str">"elena.vasquez@..."</span> -PhoneAuthenticationMethodId <span class="var">$methodId</span><br><br>
+                    <span class="cmt"># Delete Microsoft Authenticator registration</span><br>
+                    <span class="kw">Remove-MgUserAuthenticationMicrosoftAuthenticatorMethod</span> -UserId <span class="str">"elena.vasquez@..."</span> -MicrosoftAuthenticatorAuthenticationMethodId <span class="var">$methodId</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">05</span>
+                <span class="step-title">Issue a Temporary Access Pass (TAP)</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>A Temporary Access Pass is a time-limited passcode that satisfies MFA requirements, allowing the user to sign in and register new MFA methods. This is the recommended approach over "require re-registration" because it provides a controlled, auditable access window.</p>
+                <p>In the Entra portal on the user's <strong>Authentication methods</strong> page, click <strong>+ Add authentication method</strong> → <strong>Temporary Access Pass</strong>. Set the lifetime (default: 1 hour) and whether it's single-use or multi-use.</p>
+                <div class="callout info">
+                    <span class="callout-icon">ℹ️</span>
+                    <span>TAP requires an Entra ID P1 or P2 license and must be enabled in the <strong>Authentication methods policy</strong> before it can be issued. If TAP is not available, use Step 6 as the alternative approach.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">06</span>
+                <span class="step-title">Alternative: require re-registration at next sign-in</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>If TAP is not available, you can require the user to re-register MFA at their next sign-in. After deleting their old methods in Step 4, the next time they sign in and a CA policy requires MFA, Entra will prompt them to set up new methods.</p>
+                <p>However, this creates a chicken-and-egg problem: the user needs to sign in to register MFA, but CA-001 requires MFA to sign in. To break the cycle, you may need to temporarily add the user to a CA exclusion group, let them sign in and register, then remove them from the exclusion group immediately.</p>
+                <div class="callout danger">
+                    <span class="callout-icon">🚨</span>
+                    <span>If you use the temporary exclusion approach, set a calendar reminder to remove the user from the exclusion group within 1 hour. Never leave a user permanently excluded from MFA enforcement.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">07</span>
+                <span class="step-title">Confirm new MFA methods are registered</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After the user signs in with the TAP (or via temporary exclusion), they should be redirected to <strong>https://aka.ms/mysecurityinfo</strong> to register new methods. Confirm they register at least two methods (e.g., Authenticator app + phone number as backup).</p>
+                <p>Verify in the Entra portal that the new methods appear on their Authentication methods page.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="4">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">08</span>
+                <span class="step-title">Document and close</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p><strong>Root cause:</strong> How the user lost access to their MFA methods (lost device, new phone, corrupted app).<br>
+                <strong>Identity verification:</strong> How the user's identity was verified before the reset — this must be recorded for audit purposes.<br>
+                <strong>Resolution:</strong> Which methods were deleted, whether TAP or temporary exclusion was used, and what new methods the user registered.<br>
+                <strong>Prevention:</strong> Remind users to register multiple MFA methods and to transfer their Authenticator app before switching devices.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- RUNBOOK 5 — AD USER NOT APPEARING IN ENTRA                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="runbook-panel" id="rb5">
+    <div class="rb-header">
+        <div class="rb-id">RB-005</div>
+        <div class="rb-title">AD User Not Appearing in Entra</div>
+        <div class="rb-desc">A user was created in Active Directory but does not appear in Entra ID after the expected sync interval (30 minutes). The user cannot sign in to cloud apps and has no Entra profile. This is the most common Tier 1 identity support ticket in hybrid environments.</div>
+        <div class="rb-meta">
+            <span class="rb-badge severity-med"><span class="badge-dot"></span> P2 — Medium</span>
+            <span class="rb-badge category">Hybrid Sync</span>
+            <span class="rb-badge time">⏱ Est. 10–20 min</span>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Symptoms & Triggers</div>
+        <div class="symptom-grid">
+            <div class="symptom-card"><span class="sym-icon">👤</span> New hire created in AD but not visible in Entra Users after 30+ minutes</div>
+            <div class="symptom-card"><span class="sym-icon">🔍</span> User can authenticate to on-prem resources but not cloud apps</div>
+            <div class="symptom-card"><span class="sym-icon">📧</span> User has no M365 license because their Entra account doesn't exist yet</div>
+            <div class="symptom-card"><span class="sym-icon">🔄</span> HR/IT created the user in an OU that may not be in the sync scope</div>
+        </div>
+    </div>
+
+    <div class="rb-section">
+        <div class="rb-section-title">Diagnostic & Resolution Steps</div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">01</span>
+                <span class="step-title">Confirm the user exists in Active Directory</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Before troubleshooting sync, confirm the user actually exists in AD and has the expected attributes populated.</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell</span>
+                    <span class="kw">Get-ADUser</span> -Identity <span class="str">"elena.vasquez"</span> -Properties DistinguishedName, UserPrincipalName, Enabled, MemberOf<br><br>
+                    <span class="cmt"># Verify:</span><br>
+                    <span class="cmt"># - Enabled = True</span><br>
+                    <span class="cmt"># - DistinguishedName shows the correct OU</span><br>
+                    <span class="cmt"># - UserPrincipalName is populated</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">02</span>
+                <span class="step-title">Check if the user's OU is in the sync scope</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>This is the #1 cause of "user not syncing." Entra Connect is configured with OU scoping filters — only objects in selected OUs are synced. If the user was created in an OU that's not in scope, they will never appear in Entra.</p>
+                <p>Check the user's <strong>DistinguishedName</strong> from Step 1. Compare the OU path against the Entra Connect OU scoping configuration.</p>
+                <div class="decision">
+                    <div class="decision-q">Is the user's OU in the sync scope?</div>
+                    <div class="decision-branch"><span class="branch-label yes">YES →</span> OU is in scope. Proceed to Step 3 to check the connector space.</div>
+                    <div class="decision-branch"><span class="branch-label no">NO →</span> The OU is not in scope. Either move the user to a scoped OU, or add the OU to the sync scope (Step 3a).</div>
+                </div>
+                <p style="margin-top:10px"><strong>To check OU scoping:</strong> Run the Entra Connect configuration wizard → <strong>Customize synchronization options</strong> → advance to the <strong>Domain/OU Filtering</strong> page. Checked OUs are in scope.</p>
+                <div class="callout warn">
+                    <span class="callout-icon">⚠️</span>
+                    <span>If you add a new OU to the sync scope via the wizard, you must run a full sync afterward (<code>Start-ADSyncSyncCycle -PolicyType Initial</code>) for all objects in that OU to be picked up. A delta sync only catches changes — it won't discover objects in a newly added OU.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">03</span>
+                <span class="step-title">Search the connector space for the user object</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Open <strong>Synchronization Service Manager</strong> → <strong>Connectors</strong> tab. Right-click the <strong>yearwood.local</strong> connector → <strong>Search Connector Space</strong>. Search by Distinguished Name or display name.</p>
+                <div class="decision">
+                    <div class="decision-q">Does the object appear in the AD connector space?</div>
+                    <div class="decision-branch"><span class="branch-label yes">YES →</span> The import picked it up. Check if it also exists in the Entra connector space (search the ssolabs1001.onmicrosoft.com connector). If it's in AD connector but NOT in Entra connector, there may be a sync rule filtering it out. Proceed to Step 4.</div>
+                    <div class="decision-branch"><span class="branch-label no">NO →</span> The import hasn't picked it up yet. Trigger a delta import: <code>Start-ADSyncSyncCycle -PolicyType Delta</code> and wait for it to complete, then search again.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">04</span>
+                <span class="step-title">Check for sync rule filtering or attribute issues</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>If the object is in the AD connector space but not syncing to Entra, the sync rules may be filtering it out. Common reasons:</p>
+                <p>• <strong>adminDescription contains "Device"</strong> — Entra Connect's default rules skip objects with this attribute<br>
+                • <strong>isCriticalSystemObject = True</strong> — built-in AD objects are excluded<br>
+                • <strong>sAMAccountName starts with $</strong> — service accounts and computer objects<br>
+                • <strong>userAccountControl includes ACCOUNTDISABLE</strong> — some custom sync rules exclude disabled accounts<br>
+                • <strong>Custom sync rule with a scoping filter</strong> — check the Synchronization Rules Editor for any custom inbound rules with scoping conditions</p>
+                <p>Click the object in the AD connector space → <strong>Lineage</strong> tab to see which sync rules applied and whether any filtered it out.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">05</span>
+                <span class="step-title">Force a delta sync and monitor</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After resolving the issue (moved user to correct OU, added OU to scope, fixed filtering attribute), trigger a delta sync:</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell 5.1</span>
+                    <span class="kw">Start-ADSyncSyncCycle</span> -PolicyType Delta
+                </div>
+                <p>Watch the <strong>Operations</strong> tab in Synchronization Service Manager. You should see:</p>
+                <p>1. <strong>Delta Import</strong> on yearwood.local connector — picks up the new/moved user<br>
+                2. <strong>Delta Synchronization</strong> — processes the user through sync rules<br>
+                3. <strong>Export</strong> on ssolabs1001.onmicrosoft.com connector — pushes the user to Entra</p>
+                <p>All three should complete with <strong>success</strong> status. The Export step should show 1 or more adds.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">06</span>
+                <span class="step-title">Verify the user appears in Entra</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>After the export completes, check the Entra portal → <strong>Users</strong> → search for the user. Confirm:</p>
+                <p>• The user appears with <strong>On-premises synced: Yes</strong><br>
+                • The UPN has been rewritten to <code>@ssolabs1001.onmicrosoft.com</code> (or verified custom domain)<br>
+                • The display name, department, and other attributes match AD</p>
+                <div class="code-block">
+                    <span class="code-label">PowerShell — Graph</span>
+                    <span class="kw">Get-MgUser</span> -Filter <span class="str">"displayName eq 'Elena Vasquez'"</span> | <span class="kw">Select</span> DisplayName, UserPrincipalName, OnPremisesSyncEnabled
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">07</span>
+                <span class="step-title">Test cloud app sign-in</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p>Have the user attempt to sign in to a cloud app (or test via the My Apps portal at <strong>https://myapps.microsoft.com</strong>). If the user's account was just synced, remember they will need to register for MFA on first sign-in (due to CA-001). Make sure they have their phone ready for Authenticator setup.</p>
+            </div>
+        </div>
+
+        <div class="step" data-rb="5">
+            <div class="step-header">
+                <div class="step-check">✓</div>
+                <span class="step-num">08</span>
+                <span class="step-title">Document and close</span>
+                <span class="step-chevron">›</span>
+            </div>
+            <div class="step-body">
+                <p><strong>Root cause:</strong> Why the user wasn't syncing — OU not in scope, sync rule filtering, attribute issue, or simply waiting for the next delta cycle.<br>
+                <strong>Resolution:</strong> What was changed and what sync operation confirmed the fix.<br>
+                <strong>Prevention:</strong> Ensure the user provisioning process (JML script or manual creation) always places users in OUs that are within the Entra Connect sync scope. Consider documenting the OU-to-sync-scope mapping so IT staff creating users know which OUs are valid.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ── Sidebar navigation ──
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        document.querySelectorAll('.runbook-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(item.dataset.panel).classList.add('active');
+        document.querySelector('.main').scrollTop = 0;
+        window.scrollTo(0, 56);
+    });
+});
+
+// ── Step expand/collapse ──
+document.querySelectorAll('.step-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+        if (e.target.closest('.step-check')) return;
+        header.closest('.step').classList.toggle('open');
+    });
+});
+
+// ── Step checkbox ──
+document.querySelectorAll('.step-check').forEach(check => {
+    check.addEventListener('click', (e) => {
+        e.stopPropagation();
+        check.closest('.step').classList.toggle('completed');
+        updateProgress();
+    });
+});
+
+function updateProgress() {
+    const total = document.querySelectorAll('.step').length;
+    const completed = document.querySelectorAll('.step.completed').length;
+    const pct = Math.round((completed / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = completed + ' / ' + total + ' steps';
+}
+</script>
+</body>
+</html>
