@@ -1,7 +1,9 @@
 # SSO Labs — Identity Operations Runbooks
  
 An interactive Process Street-style runbook app covering the five most common Entra ID and Active Directory hybrid identity incidents. Built as a companion to the [SSO Labs Hybrid Identity Lab](https://github.com/EvanHYearwood) portfolio project.
- 
+
+These are designed to be used when resolving common operational issues in a Entra ID / Active Directory environment.
+
 ## Runbooks included
  
 - **RB-001** — Entra Connect sync failure
@@ -16,3 +18,7 @@ An interactive Process Street-style runbook app covering the five most common En
 2. Open it in any browser
  
 No install, no dependencies, no server required.
+
+<img width="1682" height="1012" alt="image" src="https://github.com/user-attachments/assets/8a38ee6d-533b-4273-9884-f29f1e4be4cc" />
+<img width="1680" height="1002" alt="image" src="https://github.com/user-attachments/assets/2822348e-1a98-41f1-b37c-2a97e8ee6bd5" />
+<img width="1688" height="1010" alt="image" src="https://github.com/user-attachments/assets/ee79f7f5-89df-4eda-9e33-e8691f77f4b7" />
