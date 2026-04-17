@@ -1,0 +1,18 @@
+# SSO Labs — Identity Operations Runbooks
+ 
+An interactive Process Street-style runbook app covering the five most common Entra ID and Active Directory hybrid identity incidents. Built as a companion to the [SSO Labs Hybrid Identity Lab](https://github.com/EvanHYearwood) portfolio project.
+ 
+## Runbooks included
+ 
+- **RB-001** — Entra Connect sync failure
+- **RB-002** — Conditional Access blocking legitimate users
+- **RB-003** — SAML SSO assertion failure
+- **RB-004** — MFA registration lockout
+- **RB-005** — AD user not appearing in Entra
+ 
+## How to use
+ 
+1. Download `sso-labs-runbooks.html`
+2. Open it in any browser
+ 
+No install, no dependencies, no server required.
