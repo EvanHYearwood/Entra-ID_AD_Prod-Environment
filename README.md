@@ -43,6 +43,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 5. **Create the break-glass account** — `bga001@ssolabs1001.onmicrosoft.com` with Global Administrator role, no MFA registered, excluded from CA-001 and CA-002 but not CA-003.<img width="1914" height="820" alt="image" src="https://github.com/user-attachments/assets/87a9ca9e-eeeb-4c49-ad6f-c2e3b069d505" />
 6. **Map policy intent to IAM vocabulary** — Six mappings connecting business rules (e.g., "contractors get restricted access") to specific Entra objects (e.g., `GRP_Contractors → excluded from ResearchHub app assignment`).<img width="563" height="422" alt="image" src="https://github.com/user-attachments/assets/263115a6-f4e6-4333-8761-e68a135c7e87" />
 
+---
 ### Phase 2 — Architecture Design
 
 7. **Diagram the AD → Entra Connect sync pipeline** — OU scoping filters, attribute flow direction, Password Hash Sync on a 2-minute channel, delta sync on a 30-minute cycle.<img width="1062" height="793" alt="image" src="https://github.com/user-attachments/assets/3efe7fdd-623e-45ff-8788-3eba6b50207f" />
@@ -51,6 +52,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 10. **Diagram the diagnostic log pipeline** — Sign-in logs, audit logs, and provisioning logs flowing to Entra log store, queryable via Graph API, Entra portal UI, and Log Analytics with KQL.
 
+---
 ### Phase 3 — Implementation
 
 11. **Build three Flask applications** — RoboFleet Portal on port 5004 (SAML with assertion viewer page), ResearchHub on port 5005 (OIDC with live Graph group membership and token claims page), LabOps Console on port 5006 (OIDC with equipment scheduling dashboard). All three launch simultaneously via `start-all.ps1`.<img width="1900" height="1005" alt="image" src="https://github.com/user-attachments/assets/bb0d8392-222b-434a-88b9-c34765f10d2a" /><img width="1677" height="891" alt="image" src="https://github.com/user-attachments/assets/88d3fb56-5b6f-432f-87e0-a7de57560e26" /><img width="1669" height="899" alt="image" src="https://github.com/user-attachments/assets/eeec782c-a17c-47c3-8fc2-651496e5a13b" /><img width="1675" height="905" alt="image" src="https://github.com/user-attachments/assets/39c81016-45b6-42d8-8771-851bf373a5fd" />
@@ -61,7 +63,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 16. **Assign groups to enterprise apps** — Employees get access to all three apps. Contractors assigned to RoboFleet and LabOps only — explicitly excluded from ResearchHub per the Phase 1 access policy.<img width="1917" height="963" alt="image" src="https://github.com/user-attachments/assets/1e2e03f2-413c-485a-8f12-b0026c1694a4" /><img width="1907" height="959" alt="image" src="https://github.com/user-attachments/assets/41df94c8-991a-495f-b84d-129f0cb7ebe9" />
 17. **Disable Security Defaults and build three CA policies** — Security Defaults disabled (cannot coexist with custom CA). CA-001, CA-002, and CA-003 created and enabled with correct targeting and exclusions.<img width="1907" height="968" alt="image" src="https://github.com/user-attachments/assets/30db239e-9d6a-47b8-865d-81d787435043" />
 
-
+---
 ### Phase 4 — Integration Testing 
 [Click Here To See Google Doc - Includes Step 18-21](https://docs.google.com/document/d/1C52Dnqa0pmlo9tpmXYEC3HHetz3j6Bw7-4jijEgBCt8/edit?usp=sharing)
 
@@ -70,7 +72,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 20. **Build a Microsoft Graph client credentials script** — `graph_client_credentials.py` authenticates as the ResearchHub application (no user present) using MSAL and the OAuth 2.0 client credentials flow. Calls `GET /users` (200 OK, 66 users) and `GET /groups` (200 OK, 7 groups) with Application permissions (`User.Read.All`, `Group.Read.All`). Verified group membership counts match AD source.
 21. **Test Conditional Access with What If** — Simulated Elena Vasquez (employee) via browser → CA-001 fires, requires MFA. Simulated same user via Exchange ActiveSync → CA-001 and CA-003 both fire, block wins (legacy auth cannot perform MFA). Confirmed block always overrides grant when multiple policies match.<img width="1584" height="1178" alt="image" src="https://github.com/user-attachments/assets/62cebe11-127f-40b4-b244-ffc06ba05c63" />
 
-
+---
 ### Phase 5 — Operational Readiness
 [Click Here To See Process.St Style Runbooks](https://github.com/EvanHYearwood/Entra-ID_AD_Prod-Environment/tree/main/Operational%20Runbooks)
 
