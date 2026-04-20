@@ -9,12 +9,6 @@ An on-premises Active Directory synced to Microsoft Entra ID via Entra Connect, 
 
 ---
 
-## 📺 Demo Walkthrough
-
-- ### [Video Coming Soon 🚀](#) <!-- Replace with actual YouTube link -->
-
----
-
 ## 1. Purpose
 
 This project simulates a production hybrid identity environment for a mid-sized organization (SSO Labs Robotics). The goal was to build, configure, and operationally validate the full identity lifecycle. From on-premises Active Directory through cloud sync to Entra ID, SSO-enabled applications, Conditional Access enforcement, and incident response readiness.
