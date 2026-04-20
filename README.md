@@ -32,7 +32,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 ---
 
-## 2. Workflow Outline (25 Steps Total)
+## 2. Workflow Outline (23 Steps Total)
 
 ### Phase 1 — Requirements & Scope Definition
 
@@ -72,6 +72,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 
 ### Phase 5 — Operational Readiness
+[Click Here To See Process.St Style Runbooks](https://github.com/EvanHYearwood/Entra-ID_AD_Prod-Environment/tree/main/Operational%20Runbooks)
 
 22. **Develop five incident runbooks (42 total diagnostic steps):**
     - **RB-001: Entra Connect sync failure** — Sync Service Manager, connector space inspection, delta vs. full sync decision, export error diagnosis (InvalidSoftMatch, AttributeValueMustBeUnique, DataValidationFailed, LargeObject).
