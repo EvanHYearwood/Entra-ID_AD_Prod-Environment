@@ -45,9 +45,10 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 ### Phase 2 — Architecture Design
 
-7. **Diagram the AD → Entra Connect sync pipeline** — OU scoping filters, attribute flow direction, Password Hash Sync on a 2-minute channel, delta sync on a 30-minute cycle.
+7. **Diagram the AD → Entra Connect sync pipeline** — OU scoping filters, attribute flow direction, Password Hash Sync on a 2-minute channel, delta sync on a 30-minute cycle.<img width="1062" height="793" alt="image" src="https://github.com/user-attachments/assets/3efe7fdd-623e-45ff-8788-3eba6b50207f" />
 8. **Diagram the SSO trust flows** — SAML SP-initiated flow (AuthnRequest → Entra authentication → signed XML assertion → ACS URL) alongside OIDC authorization code + PKCE flow (code challenge → Entra → authorization code → token exchange with verifier → Graph API calls).
-9. **Diagram the Conditional Access evaluation chain** — Four signal categories (user/group, device state, location, risk score) evaluated in parallel, most restrictive policy wins, three outcomes (grant, grant with controls, block).
+9. **Diagram the Conditional Access evaluation chain** — Four signal categories (user/group, device state, location, risk score) evaluated in parallel, most restrictive policy wins, three outcomes (grant, grant with controls, block).<img width="666" height="830" alt="image" src="https://github.com/user-attachments/assets/4b9b1e2f-7036-4ed3-9fbb-5b20baa611a3" />
+
 10. **Diagram the diagnostic log pipeline** — Sign-in logs, audit logs, and provisioning logs flowing to Entra log store, queryable via Graph API, Entra portal UI, and Log Analytics with KQL.
 
 ### Phase 3 — Implementation
