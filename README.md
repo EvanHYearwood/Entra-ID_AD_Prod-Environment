@@ -5,8 +5,6 @@ Hi, This is a hybrid identity lab built from scratch.
 
 An on-premises Active Directory synced to Microsoft Entra ID via Entra Connect, three custom applications authenticated with two different SSO protocols (SAML 2.0 and OIDC + PKCE), Conditional Access policies enforcing MFA and blocking legacy authentication, and five operational runbooks for common hybrid identity incidents.
 
-> 🤖 **Claude Used:** The three Flask applications were built with the assistance of Claude (Anthropic AI). All infrastructure decisions, Entra configuration, AD architecture, Conditional Access policy design, troubleshooting, and deployment were executed hands-on. AI was used as a coding accelerator, the same way engineers use it in real-world environments.
-
 ---
 
 ## 1. Purpose
