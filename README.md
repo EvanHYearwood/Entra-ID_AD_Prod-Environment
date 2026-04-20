@@ -1,7 +1,9 @@
 # Entra ID & AD Configuration
 
 
-Hi, This is a hybrid identity lab built from scratch. An on-premises Active Directory synced to Microsoft Entra ID via Entra Connect, three custom applications authenticated with two different SSO protocols (SAML 2.0 and OIDC + PKCE), Conditional Access policies enforcing MFA and blocking legacy authentication, and five operational runbooks for common hybrid identity incidents.
+Hi, This is a hybrid identity lab built from scratch. 
+
+An on-premises Active Directory synced to Microsoft Entra ID via Entra Connect, three custom applications authenticated with two different SSO protocols (SAML 2.0 and OIDC + PKCE), Conditional Access policies enforcing MFA and blocking legacy authentication, and five operational runbooks for common hybrid identity incidents.
 
 > 🤖 **AI Disclosure:** The three Flask applications were built with the assistance of Claude (Anthropic AI). All infrastructure decisions, Entra configuration, AD architecture, Conditional Access policy design, troubleshooting, and deployment were executed hands-on. AI was used as a coding accelerator, the same way engineers use it in real-world environments.
 
@@ -15,7 +17,7 @@ Hi, This is a hybrid identity lab built from scratch. An on-premises Active Dire
 
 ## 1. Purpose
 
-This project simulates a production hybrid identity environment for a mid-sized organization (SSO Labs Robotics). The goal was to build, configure, and operationally validate the full identity lifecycle — from on-premises Active Directory through cloud sync to Entra ID, SSO-enabled applications, Conditional Access enforcement, and incident response readiness.
+This project simulates a production hybrid identity environment for a mid-sized organization (SSO Labs Robotics). The goal was to build, configure, and operationally validate the full identity lifecycle. From on-premises Active Directory through cloud sync to Entra ID, SSO-enabled applications, Conditional Access enforcement, and incident response readiness.
 
 The lab answers a specific set of enterprise IAM questions hands-on:
 
@@ -27,11 +29,14 @@ The lab answers a specific set of enterprise IAM questions hands-on:
 
 Everything runs on a live Windows Server 2025 domain controller with a real Entra ID P1 tenant (`ssolabs1001.onmicrosoft.com`).
 
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/fee8d1ec-993e-4486-89cb-2cea490edcec" />
+
+
 ---
 
 ## 2. Workflow Outline
 
-### Phase A — Requirements & Scope Definition
+### Phase 1 — Requirements & Scope Definition
 
 1. **Define the company identity** — SSO Labs Robotics, a Zürich-headquartered robotics research company with employees and short-term contractors handling sensitive IP.
 2. **Design two user populations** — Employees (long-term, full app access, 4 departments) and Contractors (90–180 day tenure, restricted to project-specific resources only). Each population maps to a distinct AD OU and Entra group.
@@ -40,31 +45,31 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 5. **Create the break-glass account** — `bga001@ssolabs1001.onmicrosoft.com` with Global Administrator role, no MFA registered, excluded from CA-001 and CA-002 but not CA-003.
 6. **Map policy intent to IAM vocabulary** — Six mappings connecting business rules (e.g., "contractors get restricted access") to specific Entra objects (e.g., `GRP_Contractors → excluded from ResearchHub app assignment`).
 
-### Phase B — Architecture Design
+### Phase 2 — Architecture Design
 
 7. **Diagram the AD → Entra Connect sync pipeline** — OU scoping filters, attribute flow direction, Password Hash Sync on a 2-minute channel, delta sync on a 30-minute cycle.
 8. **Diagram the SSO trust flows** — SAML SP-initiated flow (AuthnRequest → Entra authentication → signed XML assertion → ACS URL) alongside OIDC authorization code + PKCE flow (code challenge → Entra → authorization code → token exchange with verifier → Graph API calls).
 9. **Diagram the Conditional Access evaluation chain** — Four signal categories (user/group, device state, location, risk score) evaluated in parallel, most restrictive policy wins, three outcomes (grant, grant with controls, block).
 10. **Diagram the diagnostic log pipeline** — Sign-in logs, audit logs, and provisioning logs flowing to Entra log store, queryable via Graph API, Entra portal UI, and Log Analytics with KQL.
 
-### Phase C — Implementation
+### Phase 3 — Implementation
 
 11. **Build three Flask applications** — RoboFleet Portal on port 5004 (SAML with assertion viewer page), ResearchHub on port 5005 (OIDC with live Graph group membership and token claims page), LabOps Console on port 5006 (OIDC with equipment scheduling dashboard). All three launch simultaneously via `start-all.ps1`.
 12. **Register apps in Entra ID** — RoboFleet as an Enterprise App with SAML SSO configuration (ACS URL, entity ID, signing certificate). ResearchHub and LabOps as App Registrations with confidential client credentials, redirect URIs, and API permissions (`User.Read`, `Group.Read.All` with admin consent).
 13. **Create 66 test users in Active Directory** — PowerShell script populating seven OUs under `_EMEA\SSOLabs` (Research, Engineering, Operations, IT, Robotics contractors, Firmware contractors, Contract Engineers). All users have Department, Title, and Company attributes. A mock HR CSV with 19 columns serves as the source-of-truth artifact.
 14. **Install and configure Entra Connect** — Customize path with OU scoping to `_EMEA\SSOLabs\Employees` and `_EMEA\SSOLabs\Contractors` only. Password Hash Sync enabled. `mS-DS-ConsistencyGuid` as source anchor. Dedicated `MSOL_` service account created automatically.
 15. **Create and sync four AD security groups** — `SSO-Employees` (48 members), `SSO-Contractors` (18 members), `SSO-Admins` (8 members, IT department), `SSO-AllUsers` (66 members). Groups synced to Entra after correcting OU scope to include the Groups OU.
-16. **Assign groups to enterprise apps** — Employees get access to all three apps. Contractors assigned to RoboFleet and LabOps only — explicitly excluded from ResearchHub per the Phase A access policy.
+16. **Assign groups to enterprise apps** — Employees get access to all three apps. Contractors assigned to RoboFleet and LabOps only — explicitly excluded from ResearchHub per the Phase 1 access policy.
 17. **Disable Security Defaults and build three CA policies** — Security Defaults disabled (cannot coexist with custom CA). CA-001, CA-002, and CA-003 created and enabled with correct targeting and exclusions.
 
-### Phase D — Integration Testing
+### Phase 4 — Integration Testing
 
 18. **Capture and annotate a live SAML assertion** — Intercepted the base64-encoded SAMLResponse from RoboFleet's ACS POST via browser DevTools. Decoded and annotated every element: Response ID, Issuer (Entra STS), NameID, SubjectConfirmation, Conditions (NotBefore/NotOnOrAfter), AudienceRestriction, `authnmethodsreferences` (proof of MFA completion), `objectidentifier` (immutable user ID).
 19. **Decode OIDC JWT claims** — Captured ID token claims from ResearchHub's Profile & Claims page. Mapped `aud`, `iss`, `oid`, `sub`, `exp`, `tid`, and `ver` claims. Confirmed cross-protocol consistency: both the SAML assertion and the JWT carry the same `oid` and `tid` values for the same user authenticating through two different protocols.
 20. **Build a Microsoft Graph client credentials script** — `graph_client_credentials.py` authenticates as the ResearchHub application (no user present) using MSAL and the OAuth 2.0 client credentials flow. Calls `GET /users` (200 OK, 66 users) and `GET /groups` (200 OK, 7 groups) with Application permissions (`User.Read.All`, `Group.Read.All`). Verified group membership counts match AD source.
 21. **Test Conditional Access with What If** — Simulated Elena Vasquez (employee) via browser → CA-001 fires, requires MFA. Simulated same user via Exchange ActiveSync → CA-001 and CA-003 both fire, block wins (legacy auth cannot perform MFA). Confirmed block always overrides grant when multiple policies match.
 
-### Phase E — Operational Readiness
+### Phase 5 — Operational Readiness
 
 22. **Develop five incident runbooks (42 total diagnostic steps):**
     - **RB-001: Entra Connect sync failure** — Sync Service Manager, connector space inspection, delta vs. full sync decision, export error diagnosis (InvalidSoftMatch, AttributeValueMustBeUnique, DataValidationFailed, LargeObject).
