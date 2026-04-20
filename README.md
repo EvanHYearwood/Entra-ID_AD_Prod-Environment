@@ -83,38 +83,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 ---
 
-## 3. Evidence
-
-<!-- Replace placeholder links with actual URLs -->
-
-### Video
-- [Full Lab Walkthrough](#) <!-- YouTube link -->
-
-### Screenshots
-- Entra ID tenant dashboard showing 66 synced users and Entra Connect status
-- Active Directory Users and Computers — OU structure under `_EMEA\SSOLabs`
-- Okta-style Entra Enterprise App SAML configuration (RoboFleet)
-- ResearchHub App Registration — redirect URIs, API permissions, admin consent
-- Conditional Access policies list — CA-001, CA-002, CA-003 all enabled
-- What If simulation results — CA-001 and CA-003 firing on legacy auth attempt
-- RoboFleet SAML Assertion Viewer page — decoded AttributeStatement claims
-- ResearchHub Profile & Claims page — JWT claims and live Graph `/me` response
-- Entra Connect Synchronization Service Manager — successful export cycle
-- Graph client credentials script terminal output — 66 users, 7 groups returned
-
-### Lab Artifacts
-- `graph_client_credentials.py` — App-only Graph API authentication script
-- `start-all.ps1` — PowerShell launcher for all three Flask apps
-- `Create-SSOLabsUsers.ps1` — AD user population script (66 users, 7 OUs)
-- `Create-SSOLabsGroups.ps1` — AD security group creation and membership script
-- `SSOLabs_HR_Database.csv` — Mock HR source-of-truth (19 columns, 66 records)
-- Decoded SAML assertion XML (annotated)
-- Five operational runbooks (HTML application)
-- IAM Incident Simulator V1 and V2 (HTML applications)
-
----
-
-## 4. Problems Resolved
+## 3. Problems Resolved
  
 ### Dev Program sandbox eligibility blocked
 **Symptom:** Both new and existing Microsoft accounts returned "You don't currently qualify for a Microsoft 365 Developer Program sandbox subscription."
