@@ -29,8 +29,6 @@ The lab answers a specific set of enterprise IAM questions hands-on:
 
 Everything runs on a live Windows Server 2025 domain controller with a real Entra ID P1 tenant (`ssolabs1001.onmicrosoft.com`).
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/fee8d1ec-993e-4486-89cb-2cea490edcec" />
-
 
 ---
 
@@ -38,7 +36,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 ### Phase 1 — Requirements & Scope Definition
 
-1. **Define the company identity** — SSO Labs Robotics, a Zürich-headquartered robotics research company with employees and short-term contractors handling sensitive IP.
+1. **Define the company identity** — SSO Labs Robotics, a Zürich-headquartered robotics research company with employees and short-term contractors handling sensitive IP.<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/fee8d1ec-993e-4486-89cb-2cea490edcec" />
 2. **Design two user populations** — Employees (long-term, full app access, 4 departments) and Contractors (90–180 day tenure, restricted to project-specific resources only). Each population maps to a distinct AD OU and Entra group.
 3. **Scope three application archetypes** — RoboFleet Portal (SAML 2.0 enterprise app), ResearchHub (OIDC app registration with Graph API integration), LabOps Console (originally planned as Entra Application Proxy, pivoted to OIDC confidential client due to P2 licensing requirement).
 4. **Write the Conditional Access policy baseline** — CA-001: MFA for all users. CA-002: MFA for admin directory roles. CA-003: Block legacy authentication. CA-004: Compliant device requirement (deferred — Intune not configured).
