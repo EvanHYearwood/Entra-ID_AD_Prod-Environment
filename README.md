@@ -80,7 +80,8 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
     - **RB-003: SAML assertion failure** — Certificate thumbprint comparison, ACS URL mismatch detection, clock skew diagnosis, correct cert rotation procedure (generate → update SP → activate in IdP).
     - **RB-004: MFA registration lockout** — Identity verification (out-of-band, never trust email/chat alone), Temporary Access Pass issuance, `Get-MgUserAuthenticationMethod` for current method inventory.
     - **RB-005: AD user not appearing in Entra** — OU scoping verification, connector space search, delta vs. full sync selection (full sync required after scope changes), attribute validation.
-23. **Build an interactive runbook reference application** — Process Street-style HTML app with expandable step-by-step procedures, inline PowerShell commands, decision trees, error code reference tables, and click-to-complete progress tracking.
+23. **Build an interactive runbook reference application** — Process Street-style HTML app with expandable step-by-step procedures, inline PowerShell commands, decision trees, error code reference tables, and click-to-complete progress tracking.<img width="3364" height="2024" alt="image" src="https://github.com/user-attachments/assets/a79f0f0e-91ff-42db-aa93-fabf9008d41d" />
+
 
 ---
 
