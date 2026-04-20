@@ -59,10 +59,11 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 14. **Install and configure Entra Connect** — Customize path with OU scoping to `_EMEA\SSOLabs\Employees` and `_EMEA\SSOLabs\Contractors` only. Password Hash Sync enabled. `mS-DS-ConsistencyGuid` as source anchor. Dedicated `MSOL_` service account created automatically.<img width="1900" height="1005" alt="image" src="https://github.com/user-attachments/assets/e67c9fc8-638c-4629-b109-c114aa969b24" />
 15. **Create and sync four AD security groups** — `SSO-Employees` (48 members), `SSO-Contractors` (18 members), `SSO-Admins` (8 members, IT department), `SSO-AllUsers` (66 members). Groups synced to Entra after correcting OU scope to include the Groups OU.
 16. **Assign groups to enterprise apps** — Employees get access to all three apps. Contractors assigned to RoboFleet and LabOps only — explicitly excluded from ResearchHub per the Phase 1 access policy.<img width="1917" height="963" alt="image" src="https://github.com/user-attachments/assets/1e2e03f2-413c-485a-8f12-b0026c1694a4" /><img width="1907" height="959" alt="image" src="https://github.com/user-attachments/assets/41df94c8-991a-495f-b84d-129f0cb7ebe9" />
+17. **Disable Security Defaults and build three CA policies** — Security Defaults disabled (cannot coexist with custom CA). CA-001, CA-002, and CA-003 created and enabled with correct targeting and exclusions.<img width="1907" height="968" alt="image" src="https://github.com/user-attachments/assets/30db239e-9d6a-47b8-865d-81d787435043" />
 
-17. **Disable Security Defaults and build three CA policies** — Security Defaults disabled (cannot coexist with custom CA). CA-001, CA-002, and CA-003 created and enabled with correct targeting and exclusions.
 
-### Phase 4 — Integration Testing
+### Phase 4 — Integration Testing 
+[Click Here To See Google Doc - Includes Step 18-21](https://docs.google.com/document/d/1C52Dnqa0pmlo9tpmXYEC3HHetz3j6Bw7-4jijEgBCt8/edit?usp=sharing)
 
 18. **Capture and annotate a live SAML assertion** — Intercepted the base64-encoded SAMLResponse from RoboFleet's ACS POST via browser DevTools. Decoded and annotated every element: Response ID, Issuer (Entra STS), NameID, SubjectConfirmation, Conditions (NotBefore/NotOnOrAfter), AudienceRestriction, `authnmethodsreferences` (proof of MFA completion), `objectidentifier` (immutable user ID).
 19. **Decode OIDC JWT claims** — Captured ID token claims from ResearchHub's Profile & Claims page. Mapped `aud`, `iss`, `oid`, `sub`, `exp`, `tid`, and `ver` claims. Confirmed cross-protocol consistency: both the SAML assertion and the JWT carry the same `oid` and `tid` values for the same user authenticating through two different protocols.
