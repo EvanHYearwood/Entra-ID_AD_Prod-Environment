@@ -32,7 +32,7 @@ Everything runs on a live Windows Server 2025 domain controller with a real Entr
 
 ---
 
-## 2. Workflow Outline
+## 2. Workflow Outline (25 Steps Total)
 
 ### Phase 1 — Requirements & Scope Definition
 
