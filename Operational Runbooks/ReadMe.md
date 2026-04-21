@@ -1,6 +1,6 @@
 # SSO Labs — Identity Operations Runbooks
  
-Hi, This is an interactive "Process Street-style" runbook app covering the five most common Entra ID and Active Directory hybrid identity incidents. Built as a companion to my [SSO Labs Hybrid Identity Lab](https://github.com/EvanHYearwood) portfolio project.
+Hi, This is an interactive "Process Street-style" runbook app covering the five most common Entra ID and Active Directory hybrid identity incidents. Built as a companion to my SSO Labs Hybrid Identity Lab
 
 These are designed to be used when resolving common operational issues in a Entra ID / Active Directory environment.
 
